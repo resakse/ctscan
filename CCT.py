@@ -8,18 +8,21 @@ def is_valid_path(filepath):
     if filepath and Path(filepath).exists():
         return True
     if not filepath:
-        sg.popup_error("Sila klik pilih untuk memilih file / folder")
+        sg.popup("Sila klik pilih untuk memilih file / folder")
         return False
-    sg.popup_error("File atau Folder mengarut.")
+    sg.popup("File atau Folder mengarut.")
     return False
 
+
 ver = [
-    [sg.Text("Ver 1.0 2023, www.resakse.com",justification="right")],
+    [sg.Text("Ver 1.0 2023, www.resakse.com", justification="right")],
 ]
 layout = [
-    [sg.Text("File Statistik"),sg.Push(), sg.Input(key="-IN-"), sg.FileBrowse("Pilih", file_types=(("Excel Files", "*.xls*"),))],
-    [sg.Text("Folder untuk di Save"),sg.Push(), sg.Input(key="-OUT-"), sg.FolderBrowse("Pilih")],
-    [sg.Exit("Keluar", s=16, button_color="tomato"), sg.Button("Proses"), sg.Column(ver, element_justification="right", expand_x=True) ],
+    [sg.Text("File Statistik"), sg.Push(), sg.Input(key="-IN-"),
+     sg.FileBrowse("Pilih", file_types=(("Excel Files", "*.xls*"),))],
+    [sg.Text("Folder untuk di Save"), sg.Push(), sg.Input(key="-OUT-"), sg.FolderBrowse("Pilih")],
+    [sg.Exit("Keluar", s=16, button_color="tomato"), sg.Button("Proses"),
+     sg.Column(ver, element_justification="right", expand_x=True)],
 ]
 
 
