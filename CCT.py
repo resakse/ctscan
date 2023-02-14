@@ -2,7 +2,7 @@ from pathlib import Path
 
 import PySimpleGUI as sg
 import pandas as pd
-
+import os
 
 def is_valid_path(filepath):
     if filepath and Path(filepath).exists():
@@ -15,7 +15,7 @@ def is_valid_path(filepath):
 
 
 ver = [
-    [sg.Text("Ver 1.0 2023, www.resakse.com", justification="right")],
+    [sg.Text("Ver 1.1 2023, www.resakse.com", justification="right")],
 ]
 layout = [
     [sg.Text("File Statistik"), sg.Push(), sg.Input(key="-IN-"),
@@ -32,7 +32,7 @@ def prosesfile(ct_input, ct_output):
     outputfile = Path(ct_output) / f"convert_{filename}.xlsx"
     # convert datetime
     df['DATE_OF_BIRTH'] = df['DATE_OF_BIRTH'].dt.strftime('%d/%m/%Y')
-    df['ADDED_DATE'] = df['ADDED_DATE'].dt.strftime('%d/%m/%Y %H')
+   # df['ADDED_DATE'] = df['ADDED_DATE'].dt.strftime('%d/%m/%Y %H')
     df['NATIONAL_ID_NO'] = df['NATIONAL_ID_NO'].astype(str).str.replace('.0', '', regex=False)
     # buang column tak berkenaan
     del df['ORDER_TYPE_CODE']
@@ -40,13 +40,14 @@ def prosesfile(ct_input, ct_output):
     del df['DATE_OF_BIRTH']
     del df['STATUS']
     del df['RADIOLOGIST_ID']
-    #  unik = pd.concat(g for _, g in df.groupby("PATIENT_ID") if len(g) > 1) <-- lupa dah apsal aku buat ni
-    unik = df[df['SHORT_DESC'] != 'CT Lungs (HRCT)']  # filter yang bukan hrct lung
-    akhir = unik.drop_duplicates(
-        ['PATIENT_ID', 'ADDED_DATE'])  # buang duplicate rekod pt id yang sama dlm jam yang sama
-    akhir.to_excel(outputfile, index=False)
-    sg.popup_no_titlebar("Siap! :)")
 
+    df = df.sort_values(by=['PATIENT_ID', 'ADDED_DATE']) #sort kemudian shift & mark duplicate < 1 jam
+    mask = (df['PATIENT_ID'] == df['PATIENT_ID'].shift(1)) & (abs(df['ADDED_DATE'] - df['ADDED_DATE'].shift(1)) < pd.Timedelta('1 hour'))
+    df.loc[mask, 'to_remove'] = True
+    df = df[df.to_remove != True] # filter out yang kena mark
+    del df['to_remove'] # buang column
+    df.to_excel(outputfile, index=False)
+    sg.popup("Siap! :)")
 
 window = sg.Window("Convert Statistik CT Scan", layout, icon=r'cticon.ico')
 
